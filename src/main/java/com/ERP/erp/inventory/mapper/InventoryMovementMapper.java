@@ -35,6 +35,10 @@ public class InventoryMovementMapper {
             dto.setReference(movement.getReference());
         }
 
+        if (movement.getCreatedAt() != null) {
+            dto.setCreatedAt(movement.getCreatedAt());
+        }
+
         return dto;
     }
 
@@ -45,9 +49,9 @@ public class InventoryMovementMapper {
 
         InventoryMovement movement = new InventoryMovement();
 
-        if (dto.getId() != null) {
-            movement.setId(dto.getId());
-        }
+//        if (dto.getId() != null) {
+//            movement.setId(dto.getId());
+//        }
 
         if (dto.getProductId() != null) {
             Product product = new Product();

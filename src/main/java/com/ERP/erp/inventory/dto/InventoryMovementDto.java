@@ -4,11 +4,13 @@ import com.ERP.erp.inventory.model.MovementType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Data
 public class InventoryMovementDto {
     private Long id;
 
-    @NotNull(message = "Product ID is required")
     private Long productId;
 
     @NotNull(message = "Quantity is required")
@@ -18,4 +20,6 @@ public class InventoryMovementDto {
     private MovementType movementType;
 
     private String reference;
+
+    private LocalDateTime createdAt;
 }

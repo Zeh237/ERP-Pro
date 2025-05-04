@@ -1,6 +1,9 @@
 package com.ERP.erp.inventory.repository;
 
 import com.ERP.erp.inventory.model.Product;
+import com.ERP.erp.inventory.model.ProductStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
@@ -12,5 +15,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsBySku(String sku);
 
-    List<Product> findByNameContainingIgnoreCaseOrSkuContainingIgnoreCase(String query, String query1);
+    Page<Product> findByNameContainingIgnoreCaseOrSkuContainingIgnoreCase(String nameQuery, String skuQuery, Pageable pageable);
+
+    Page<Product> findByNameContainingIgnoreCaseOrSkuContainingIgnoreCaseAndStatus(
+            String nameQuery,
+            String skuQuery,
+            ProductStatus status,
+            Pageable pageable
+    );
+
+    Page<Product> findByStatus(ProductStatus status, Pageable pageable);
 }

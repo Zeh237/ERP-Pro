@@ -116,16 +116,33 @@ public class InventoryService {
         return productRepository.findByStockQuantityLessThanEqual(5);
     }
 
-    public Page<Product> getAllProducts(int page, int size){
+    public Page<Product> getAllProducts(int page, int size, ProductStatus status) {
         Pageable pageable = PageRequest.of(page, size);
+
+        if (status != null) {
+            return productRepository.findByStatus(status, pageable);
+        }
         return productRepository.findAll(pageable);
     }
 
-    public List<ProductDto> searchProducts(String query) {
-        return productRepository.findByNameContainingIgnoreCaseOrSkuContainingIgnoreCase(query, query)
-                .stream()
-                .map(productMapper::toDto)
-                .toList();
+    public Page<Product> searchProducts(String query, ProductStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        String searchQuery = query == null ? "" : query.trim();
+
+        if (status == null) {
+            return productRepository.findByNameContainingIgnoreCaseOrSkuContainingIgnoreCase(
+                    searchQuery,
+                    searchQuery,
+                    pageable
+            );
+        } else {
+            return productRepository.findByNameContainingIgnoreCaseOrSkuContainingIgnoreCaseAndStatus(
+                    searchQuery,
+                    searchQuery,
+                    status,
+                    pageable
+            );
+        }
     }
 
     @Transactional
@@ -134,24 +151,21 @@ public class InventoryService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Product not found with id: " + movementDto.getProductId()));
 
-        InventoryMovement movement = inventoryMovementMapper.toEntity(movementDto);
-        movement = inventoryMovementRepository.save(movement);
+        int newQuantity = switch (movementDto.getMovementType()) {
+            case PURCHASE, TRANSFER_IN, RETURN, PRODUCTION ->
+                    product.getStockQuantity() + movementDto.getQuantity();
+            case SALE, TRANSFER_OUT, LOSS ->
+                    product.getStockQuantity() - movementDto.getQuantity();
+            case ADJUSTMENT -> movementDto.getQuantity();
+        };
 
-        switch(movementDto.getMovementType()) {
-            case PURCHASE:
-            case TRANSFER_IN:
-            case RETURN:
-                product.setStockQuantity(product.getStockQuantity() + movementDto.getQuantity());
-                break;
-            case SALE:
-            case TRANSFER_OUT:
-            case LOSS:
-                product.setStockQuantity(product.getStockQuantity() - movementDto.getQuantity());
-                break;
-            case ADJUSTMENT:
-                product.setStockQuantity(movementDto.getQuantity());
-                break;
-        }
+        product.setStockQuantity(newQuantity);
+        productRepository.save(product); // Save product first
+
+        InventoryMovement movement = inventoryMovementMapper.toEntity(movementDto);
+        movement = inventoryMovementRepository.save(movement); // Then save movement
+
+        logger.info("Movement {} created. New stock: {}", movement.getId(), newQuantity);
 
         return movement;
     }
