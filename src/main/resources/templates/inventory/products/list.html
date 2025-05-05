@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Product Inventory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .pagination .active { background-color: #000; color: white; }
+        .pagination .disabled { opacity: 0.5; pointer-events: none; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+        .nav-active { background-color: #f3f4f6; color: #000; }
+    </style>
+</head>
+<body class="bg-gray-50">
+<!-- Top Navigation -->
+<header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+        <div class="font-bold text-xl text-gray-800">ERP<span class="text-black">Pro</span></div>
+    </div>
+    <div class="flex items-center space-x-4">
+        <a href="/" class="text-sm text-gray-600 hover:text-black">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+    </div>
+</header>
+
+<div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 p-4 hidden md:block">
+        <nav class="space-y-1">
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">Main</div>
+            <a href="/" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-home text-gray-500"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-shopping-cart text-gray-500"></i>
+                <span>Sales</span>
+            </a>
+            <a href="/inventory/products/list" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-boxes text-gray-500"></i>
+                <span>Inventory</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-file-invoice-dollar text-gray-500"></i>
+                <span>Accounting</span>
+            </a>
+
+            <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">Other</div>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-users text-gray-500"></i>
+                <span>CRM</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-user-tie text-gray-500"></i>
+                <span>HR</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-cog text-gray-500"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-semibold text-gray-900">Product Inventory</h1>
+                <p class="text-gray-500" th:text="'Showing ' + ${productPage.totalElements} + ' products'"></p>
+            </div>
+            <div class="flex space-x-2">
+                <a href="/inventory/products/create"
+                   class="px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800">
+                    <i class="fas fa-plus mr-2"></i>Add Product
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            <form th:action="@{/inventory/products/list}" method="get" class="flex flex-col md:flex-row md:items-center gap-4">
+                <!-- Status Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status" class="w-full md:w-48 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        <option value="">All Statuses</option>
+                        <option th:each="status : ${allStatuses}"
+                                th:value="${status}"
+                                th:selected="${status == currentStatus}"
+                                th:text="${status.displayName}"></option>
+                    </select>
+                </div>
+
+                <!-- Items Per Page -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Items per page</label>
+                    <select name="size" onchange="this.form.submit()" class="w-full md:w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        <option th:each="i : ${ {10, 25, 50, 100} }"
+                                th:value="${i}"
+                                th:selected="${i == productPage.size}"
+                                th:text="${i}"></option>
+                    </select>
+                </div>
+
+                <!-- Search Input -->
+                <div class="flex-grow">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <div class="relative">
+                        <input type="text" name="search" placeholder="Search products..."
+                               th:value="${param.search}"
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- Hidden Page Field -->
+                <input type="hidden" name="page" th:value="${productPage.number}">
+
+                <!-- Submit Button -->
+                <div class="self-end">
+                    <button type="submit" class="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 mt-6 md:mt-0">
+                        Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${productPage.empty}" class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <i class="fas fa-box-open text-gray-400 text-5xl mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-1">No products found</h3>
+            <p class="text-gray-500 mb-6">Try adjusting your filters or create a new product</p>
+            <a href="/inventory/products/create"
+               class="px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800">
+                <i class="fas fa-plus mr-2"></i>Create Product
+            </a>
+        </div>
+
+        <!-- Product Table -->
+        <div th:unless="${productPage.empty}" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tr th:each="product : ${productPage.content}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" th:text="${product.sku}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900" th:text="${product.name}"></div>
+                            <div class="text-sm text-gray-500" th:text="${product.description} ?: 'No description'"></div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm"
+                                 th:class="${product.stockQuantity <= (product.reorderThreshold ?: 5)} ? 'text-red-600 font-medium' : 'text-gray-900'"
+                                 th:text="${product.stockQuantity} + ' in stock'"></div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                            th:text="${'$' + #numbers.formatDecimal(product.price, 1, 2)}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:with="status=${product.status}"
+                                      class="px-2 py-1 text-xs rounded-full"
+                                      th:class="${status.badgeClasses}">
+                                    <i th:class="${status.iconClass + ' mr-1'}"></i>
+                                    <span th:text="${status.displayName}"></span>
+                                </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a th:href="@{/inventory/products/{id}/edit(id=${product.id})}"
+                               class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
+                            <a th:href="@{/inventory/products/{id}/movements(id=${product.id})}"
+                               class="text-gray-600 hover:text-gray-900">History</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div class="text-sm text-gray-500">
+                    Showing <span th:text="${productPage.number * productPage.size + 1}"></span> to
+                    <span th:text="${(productPage.number * productPage.size) + productPage.numberOfElements}"></span> of
+                    <span th:text="${productPage.totalElements}"></span> products
+                </div>
+                <div class="flex space-x-1 pagination">
+                    <!-- First Page -->
+                    <a th:href="@{/inventory/products/list(size=${productPage.size}, page=0, status=${currentStatus}, search=${param.search})}"
+                       th:classappend="${productPage.first} ? 'pointer-events-none opacity-50' : ''"
+                       class="px-3 py-1 border rounded-md hover:bg-gray-50">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+
+                    <!-- Previous Page -->
+                    <a th:href="@{/inventory/products/list(size=${productPage.size}, page=${productPage.number-1}, status=${currentStatus}, search=${param.search})}"
+                       th:classappend="${productPage.first} ? 'pointer-events-none opacity-50' : ''"
+                       class="px-3 py-1 border rounded-md hover:bg-gray-50">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+
+                    <!-- Page Numbers -->
+                    <a th:each="i : ${#numbers.sequence(0, productPage.totalPages-1)}"
+                       th:href="@{/inventory/products/list(size=${productPage.size}, page=${i}, status=${currentStatus}, search=${param.search})}"
+                       th:classappend="${i == productPage.number} ? 'active' : 'hover:bg-gray-50'"
+                       class="px-3 py-1 border rounded-md"
+                       th:text="${i+1}">
+                    </a>
+
+                    <!-- Next Page -->
+                    <a th:href="@{/inventory/products/list(size=${productPage.size}, page=${productPage.number+1}, status=${currentStatus}, search=${param.search})}"
+                       th:classappend="${productPage.last} ? 'pointer-events-none opacity-50' : ''"
+                       class="px-3 py-1 border rounded-md hover:bg-gray-50">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+
+                    <!-- Last Page -->
+                    <a th:href="@{/inventory/products/list(size=${productPage.size}, page=${productPage.totalPages-1}, status=${currentStatus}, search=${param.search})}"
+                       th:classappend="${productPage.last} ? 'pointer-events-none opacity-50' : ''"
+                       class="px-3 py-1 border rounded-md hover:bg-gray-50">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

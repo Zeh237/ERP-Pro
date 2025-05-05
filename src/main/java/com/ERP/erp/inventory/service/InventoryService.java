@@ -177,4 +177,12 @@ public class InventoryService {
                 .collect(Collectors.toList());
     }
 
+    public Page<InventoryMovementDto> getMovementHistory(Long productId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<InventoryMovement> movementPage = inventoryMovementRepository.findByProductIdOrderByCreatedAtDesc(productId, pageable);
+
+        return movementPage.map(inventoryMovementMapper::toDto);
+    }
+
 }

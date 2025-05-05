@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Product</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-error {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+<!-- Top Navigation -->
+<header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+        <div class="font-bold text-xl text-gray-800">ERP<span class="text-black">Pro</span></div>
+
+        <!-- Search -->
+        <div class="relative w-64">
+            <input type="text" placeholder="Search orders, products..."
+                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+        </div>
+    </div>
+
+    <div class="flex items-center space-x-4">
+        <button class="p-2 text-gray-500 hover:text-gray-700 relative">
+            <i class="far fa-bell"></i>
+            <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+        </button>
+
+        <!-- In your header section -->
+        <div class="flex items-center space-x-2">
+            <a href="/profile" class="flex items-center space-x-2 hover:text-gray-700">
+                <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <i class="far fa-user text-gray-600"></i>
+                </div>
+                <span class="text-sm font-medium" th:text="${user.firstName + ' ' + user.lastName}"></span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 p-4 hidden md:block">
+        <nav class="space-y-1">
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">Main</div>
+            <a href="/" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-home text-gray-500"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-shopping-cart text-gray-500"></i>
+                <span>Sales</span>
+            </a>
+            <a href="/inventory/products/list" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-boxes text-gray-500"></i>
+                <span>Inventory</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-file-invoice-dollar text-gray-500"></i>
+                <span>Accounting</span>
+            </a>
+
+            <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">Other</div>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-users text-gray-500"></i>
+                <span>CRM</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-user-tie text-gray-500"></i>
+                <span>HR</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-cog text-gray-500"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
+        <div class="max-w-3xl mx-auto">
+            <div class="mb-6">
+                <h1 class="text-2xl font-semibold text-gray-900">Edit Product</h1>
+                <p class="text-gray-500">Update the details below</p>
+            </div>
+
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="bg-green-50 text-green-800 p-3 rounded-md mb-4">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span th:text="${success}"></span>
+            </div>
+            <div th:if="${error}" class="bg-red-50 text-red-800 p-3 rounded-md mb-4">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span th:text="${error}"></span>
+            </div>
+
+            <form th:action="@{/inventory/products/{id}/edit(id=${product.id})}"
+                  th:object="${product}" method="post"
+                  class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <!-- Hidden ID Field -->
+                <input type="hidden" th:field="*{id}">
+
+                <!-- SKU -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">SKU *</label>
+                    <input type="text" th:field="*{sku}"
+                           class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                           :class="${#fields.hasErrors('sku')} ? 'border-red-300' : 'border-gray-300'">
+                    <p th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"
+                       class="form-error"></p>
+                </div>
+
+                <!-- Name -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Product Name *</label>
+                    <input type="text" th:field="*{name}"
+                           class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                           :class="${#fields.hasErrors('name')} ? 'border-red-300' : 'border-gray-300'">
+                    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+                       class="form-error"></p>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea th:field="*{description}"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                              rows="3"></textarea>
+                </div>
+
+                <!-- Price -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500">$</span>
+                        </div>
+                        <input type="number" step="0.01" th:field="*{price}"
+                               class="block w-full pl-7 pr-12 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                               :class="${#fields.hasErrors('price')} ? 'border-red-300' : 'border-gray-300'">
+                    </div>
+                    <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}"
+                       class="form-error"></p>
+                </div>
+
+                <!-- Stock Quantity -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Stock</label>
+                    <input type="number" th:field="*{stockQuantity}" min="0"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                </div>
+
+                <!-- Reorder Threshold -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Reorder Threshold</label>
+                    <input type="number" th:field="*{reorderThreshold}" min="0"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                    <p class="text-xs text-gray-500 mt-1">System will alert when stock reaches this level</p>
+                </div>
+
+                <!-- Status -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                    <select th:field="*{status}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        <option th:each="status : ${allStatuses}"
+                                th:value="${status}"
+                                th:selected="${product.status == status}"
+                                th:text="${status.displayName}"></option>
+                    </select>
+                </div>
+
+                <!-- Category -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select th:field="*{categoryId}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        <option value="">-- Select Category --</option>
+                        <option th:each="category : ${categories}"
+                                th:value="${category.id}"
+                                th:selected="${product.categoryId == category.id}"
+                                th:text="${category.name}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-between space-x-3 pt-4 border-t border-gray-200">
+                    <button type="button"
+                            onclick="if(confirm('Are you sure?')) {
+                                    document.getElementById('deleteForm').submit();
+                                }"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700">
+                        <i class="fas fa-trash mr-2"></i> Delete Product
+                    </button>
+                    <div>
+                        <a href="/inventory/products/list"
+                           class="px-4 py-2 border border-gray-300 rounded-md text-sm mr-3 hover:bg-gray-50">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="px-4 py-2 bg-black text-white rounded-md text-sm hover:bg-gray-800">
+                            <i class="fas fa-save mr-2"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <form id="deleteForm"
+                  th:action="@{/inventory/products/{id}/delete(id=${product.id})}"
+                  method="post"
+                  style="display: none;">
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('aside nav a');
+
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.remove('text-gray-700', 'hover:bg-gray-100');
+                link.classList.add('bg-gray-100', 'text-black');
+            }
+        });
+    });
+</script>
+</html>
