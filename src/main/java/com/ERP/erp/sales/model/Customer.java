@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -24,6 +25,9 @@ public class Customer {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @OneToMany(mappedBy = "customer")
+    private List<SalesOrder> orders;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
