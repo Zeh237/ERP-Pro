@@ -3,8 +3,6 @@ package com.ERP.erp.inventory.dto;
 import com.ERP.erp.inventory.model.MovementType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
