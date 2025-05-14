@@ -6,7 +6,6 @@ import com.ERP.erp.sales.model.OrderItem;
 import com.ERP.erp.sales.model.SalesOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
