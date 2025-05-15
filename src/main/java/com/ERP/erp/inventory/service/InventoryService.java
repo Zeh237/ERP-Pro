@@ -185,4 +185,9 @@ public class InventoryService {
         return movementPage.map(inventoryMovementMapper::toDto);
     }
 
+    public List<ProductDto> getAllProducts(){
+        List<Product> products = productRepository.findAll();
+        return products.stream().map(productMapper::toDto).collect(Collectors.toList());
+    }
+
 }
