@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Customer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-error {
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+         .nav-active { background-color: #f3f4f6; color: #000; }
+    </style>
+</head>
+<body class="bg-gray-50">
+<header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+        <div class="font-bold text-xl text-gray-800">ERP<span class="text-black">Pro</span></div>
+
+        <div class="relative w-64">
+            <input type="text" placeholder="Search orders, products..."
+                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+            <i class="fas fa-search absolute left-3 top-2.5 text-gray-400"></i>
+        </div>
+    </div>
+
+    <div class="flex items-center space-x-4">
+        <button class="p-2 text-gray-500 hover:text-gray-700 relative">
+            <i class="far fa-bell"></i>
+            <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+        </button>
+
+        <div class="flex items-center space-x-2">
+            <a href="/profile" class="flex items-center space-x-2 hover:text-gray-700">
+                <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <i class="far fa-user text-gray-600"></i>
+                </div>
+                <span class="text-sm font-medium" th:text="${user != null ? user.firstName + ' ' + user.lastName : 'User Name'}"></span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<div class="flex">
+    <aside class="w-64 bg-white border-r border-gray-200 p-4 hidden md:block">
+        <nav class="space-y-1">
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">Main</div>
+            <a href="/" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-home text-gray-500"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-shopping-cart text-gray-500"></i>
+                <span>Sales</span>
+            </a>
+            <a href="/inventory/products/list" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-boxes text-gray-500"></i>
+                <span>Inventory</span>
+            </a>
+            <a href="/customer/list" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700 nav-active">
+                <i class="fas fa-users text-gray-500"></i>
+                <span>Customers</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-file-invoice-dollar text-gray-500"></i>
+                <span>Accounting</span>
+            </a>
+
+            <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">Other</div>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-users text-gray-500"></i>
+                <span>CRM</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-user-tie text-gray-500"></i>
+                <span>HR</span>
+            </a>
+            <a href="#" class="flex items-center space-x-3 px-3 py-2 hover:bg-gray-100 rounded-md text-gray-700">
+                <i class="fas fa-cog text-gray-500"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-6">
+        <div class="max-w-3xl mx-auto">
+            <div class="mb-6">
+                <h1 class="text-2xl font-semibold text-gray-900">Edit Customer</h1>
+                <p class="text-gray-500">Update the customer details below</p>
+            </div>
+
+            <div th:if="${success}" class="bg-green-50 text-green-800 p-3 rounded-md mb-4">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span th:text="${success}"></span>
+            </div>
+            <div th:if="${error}" class="bg-red-50 text-red-800 p-3 rounded-md mb-4">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span th:text="${error}"></span>
+            </div>
+
+            <form th:action="@{/customer/update/{id}(id=${customer.id})}"
+                  th:object="${customer}" method="post"
+                  class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <input type="hidden" th:field="*{id}">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Customer Name *</label>
+                    <input type="text" th:field="*{name}" required
+                           class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                           th:classappend="${#fields.hasErrors('name')} ? 'border-red-300' : 'border-gray-300'">
+                    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
+                       class="form-error"></p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input type="email" th:field="*{email}" required
+                           class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                           th:classappend="${#fields.hasErrors('email')} ? 'border-red-300' : 'border-gray-300'">
+                    <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
+                       class="form-error"></p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input type="text" th:field="*{phone}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                </div>
+
+                <div class="mb-6 border-t border-gray-200 pt-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-3">Address</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Street</label>
+                            <input type="text" th:field="*{address.street}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                            <input type="text" th:field="*{address.city}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                            <input type="text" th:field="*{address.state}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                            <input type="text" th:field="*{address.postalCode}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                            <input type="text" th:field="*{address.country}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <div class="flex items-center">
+                        <input id="active" type="checkbox" th:field="*{active}"
+                               class="h-4 w-4 text-black border-gray-300 rounded focus:ring-black">
+                        <label for="active" class="ml-2 block text-sm text-gray-900">
+                            Customer is Active
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-between space-x-3 pt-4 border-t border-gray-200">
+                    <button type="button"
+                            onclick="if(confirm('Are you sure you want to delete this customer?')) {
+                                    document.getElementById('deleteCustomerForm').submit();
+                                }"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700">
+                        <i class="fas fa-trash mr-2"></i> Delete Customer
+                    </button>
+                    <div>
+                        <a th:href="@{/customer/list}"
+                           class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 mr-3">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="px-4 py-2 bg-black text-white rounded-md text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+                            <i class="fas fa-save mr-2"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <form id="deleteCustomerForm"
+                  th:action="@{/customer/delete/{id}(id=${customer.id})}"
+                  method="post"
+                  style="display: none;">
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('aside nav a');
+
+        navLinks.forEach(link => {
+            // Check if the link's href starts with /customer or /sales
+            // This handles cases like /customer/create, /customer/list, /customer/edit/{id}
+            if (currentPath.startsWith('/customer') || currentPath.startsWith('/sales')) {
+                 const salesLink = document.querySelector('aside nav a[href="#"].nav-active');
+                 if (salesLink) {
+                     salesLink.classList.remove('nav-active');
+                 }
+                 const currentSalesLink = document.querySelector('aside nav a i.fas.fa-shopping-cart').closest('a');
+                 if (currentSalesLink) {
+                    currentSalesLink.classList.add('nav-active');
+                 }
+            } else if (currentPath === '/' && link.getAttribute('href') === '/') {
+                 navLinks.forEach(nav => nav.classList.remove('nav-active')); // Remove active from others
+                 link.classList.add('nav-active'); // Add active to dashboard if on root
+            } else if (currentPath.startsWith(link.getAttribute('href')) && link.getAttribute('href') !== '/') {
+                 navLinks.forEach(nav => nav.classList.remove('nav-active')); // Remove active from others
+                 link.classList.add('nav-active'); // Add active to the current section link
+            }
+        });
+    });
+</script>
+</html>
